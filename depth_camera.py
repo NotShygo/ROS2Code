@@ -1,7 +1,6 @@
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import Image
-from std_msgs.msg import String 
 from cv_bridge import CvBridge
 import cv2
 
@@ -16,18 +15,10 @@ class ROS(Node):
         self._bridge = CvBridge()
         self.depth_subscription = self.create_subscription(Image,'/camera/depth/image_raw',self.depth_callback,10)
 
-        self.publisher_ = self.create_publisher(String, 'pymsg', 10)
-
     def image_callback(self, msg):
         self._image = self._bridge.imgmsg_to_cv2(msg,desired_encoding='bgr8')
     def depth_callback(self, msg):
         self._depth = self._bridge.imgmsg_to_cv2(msg,desired_encoding='passthrough')
-
-    def msg_publish(self, msg):
-        ros_msg = String()
-        ros_msg.data = msg
-        self.publisher_.publish(ros_msg)
-
 
 def main(args=None):
     rclpy.init(args=args)
@@ -42,6 +33,7 @@ def main(args=None):
             image = node._image.copy()
             depth = node._depth.copy()
 
+            # Depth Messages
             height, width = depth.shape
             center_x, center_y = width // 2, height // 2
             depth_at_center = depth[int(center_y), int(center_x)]
@@ -52,8 +44,6 @@ def main(args=None):
             key_code = cv2.waitKey(1)
             if key_code in [27, ord('q')]:
                 break
-            elif key_code in [ord('h')]:
-                node.msg_publish("Hi")
 
     except KeyboardInterrupt:
         pass
