@@ -35,25 +35,18 @@ if __name__ == '__main__':
             boxes = result[0].boxes
             names = result[0].names
 
-            for i in boxes.xyxy:
-                a = i.tolist()
+            for box, cls_idx, conf_val in zip(boxes.xyxy, boxes.cls, boxes.conf):
+                a = box.tolist()
                 first_point = (int(a[0]), int(a[1]))
                 last_point = (int(a[2]), int(a[3]))
-                cv2.rectangle(image, first_point, last_point, (0, 255, 0), 2)
+                cv2.rectangle(image, first_point, last_point, (255, 255, 0), 1)
 
-                cls = int(boxes.cls[0])
-                conf = boxes.conf[0].item()
-                conf = "{:.2f}".format(conf)
-                
+                cls = int(cls_idx) # 使用當前迭代的類別索引
+                conf = "{:.2f}".format(conf_val.item()) # 使用當前迭代的信心度
 
-                org = [int(a[0]), int(a[1])]
-                font = cv2.FONT_HERSHEY_SIMPLEX
-                fontScale = 1
-                color = (0, 255, 0)
-                thickness = 2
-
-                text = names[cls]+ " "+conf
-                cv2.putText(image, text, org, font, fontScale, color, thickness)
+                org = [int(a[0]), int(a[1]) - 5] # 稍微往上一點，才不會壓到框
+                text = names[cls] + " " + conf
+                cv2.putText(image, text, tuple(org), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (255, 255, 0), 2)
             
             cv2.imshow("image", image)
             if cv2.waitKey(1) == ord('q'):
